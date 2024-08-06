@@ -39,11 +39,11 @@ public class ServerController {
     @ResponseStatus(HttpStatus.OK)
     public Integer getOutboundFlights() {
         log.info("Received request to retrieve the number of outbound flights.");
-        return flightScannerService
+        return (int) flightScannerService
                 .getFlightsData()
                 .stream()
                 .filter(flightData -> !flightData.isInbound()) // Filter only outbound flights
-                .toList().size();
+                .count();
     }
 
     /**
@@ -54,11 +54,11 @@ public class ServerController {
     @ResponseStatus(HttpStatus.OK)
     public Integer getInboundFlights() {
         log.info("Received request to retrieve the number of inbound flights.");
-        return flightScannerService
+        return (int) flightScannerService
                 .getFlightsData()
                 .stream()
                 .filter(FlightData::isInbound) // Filter only inbound flights
-                .toList().size();
+                .count();
     }
 
     /**
@@ -70,11 +70,11 @@ public class ServerController {
     @ResponseStatus(HttpStatus.OK)
     public Integer getFlightsFromCountry(@RequestParam String country) {
         log.info("Received request to retrieve the number of flights (inbound & outbound) from country '{}'.", country);
-        return flightScannerService
+        return (int) flightScannerService
                 .getFlightsData()
                 .stream()
                 .filter(flightData -> flightData.country().equals(country))
-                .toList().size();
+                .count();
     }
 
     /**
@@ -86,11 +86,11 @@ public class ServerController {
     @ResponseStatus(HttpStatus.OK)
     public Integer getOutboundFlightsFromCountry(@RequestParam String country) {
         log.info("Received request to retrieve the number of outbound flights to country '{}'.", country);
-        return flightScannerService
+        return (int) flightScannerService
                 .getFlightsData()
                 .stream()
                 .filter(flightData -> flightData.country().equals(country) && !flightData.isInbound())
-                .toList().size();
+                .count();
     }
 
     /**
@@ -102,11 +102,11 @@ public class ServerController {
     @ResponseStatus(HttpStatus.OK)
     public Integer getInboundFlightsFromCountry(@RequestParam String country) {
         log.info("Received request to retrieve the number of inbound flights to country '{}'.", country);
-        return flightScannerService
+        return (int) flightScannerService
                 .getFlightsData()
                 .stream()
                 .filter(flightData -> flightData.country().equals(country) && flightData.isInbound())
-                .toList().size();
+                .count();
     }
 
     /**
@@ -117,11 +117,11 @@ public class ServerController {
     @ResponseStatus(HttpStatus.OK)
     public Integer getDelayed() {
         log.info("Received request to retrieve the number of delayed flights.");
-        return flightScannerService
+        return (int) flightScannerService
                 .getFlightsData()
                 .stream()
                 .filter(flightData -> !flightData.realDepartureTime().equals(flightData.estimatedDepartureTime())) // Check if the real departure time is not equal to the estimated departure time
-                .toList().size();
+                .count();
     }
 
     /**
