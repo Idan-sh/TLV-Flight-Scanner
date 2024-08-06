@@ -32,6 +32,7 @@ public class FlightScannerService {
             JSONObject record = recordsArray.getJSONObject(i);
             FlightData flightData = new FlightData(
                     record.getString("CHOPER") + record.getString("CHFLTN"),
+                    record.getString("CHSTOL"),
                     record.getString("CHPTOL"),
                     record.getString("CHLOC1"),
                     record.getString("CHLOC1T"),

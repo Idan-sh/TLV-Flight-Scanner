@@ -1,5 +1,6 @@
 package com.tlvflightscanner.controller;
 
+import com.tlvflightscanner.dto.data.FlightData;
 import com.tlvflightscanner.dto.response.QuickGetawayResponse;
 import com.tlvflightscanner.service.FlightScannerService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,7 +27,7 @@ public class ServerController {
     @GetMapping("/all-flights")
     @ResponseStatus(HttpStatus.OK)
     public Integer getAllFlights() {
-        log.info("Received request to retrieve all flights");
+        log.info("Received request to retrieve the number of flights (inbound & outbound).");
         return flightScannerService.getFlightsData().size();
     }
 
@@ -34,7 +38,12 @@ public class ServerController {
     @GetMapping("/outbound-flights")
     @ResponseStatus(HttpStatus.OK)
     public Integer getOutboundFlights() {
-        return 0;
+        log.info("Received request to retrieve the number of outbound flights.");
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .filter(flightData -> !flightData.isInbound()) // Filter only outbound flights
+                .toList().size();
     }
 
     /**
@@ -44,7 +53,12 @@ public class ServerController {
     @GetMapping("/inbound-flights")
     @ResponseStatus(HttpStatus.OK)
     public Integer getInboundFlights() {
-        return 0;
+        log.info("Received request to retrieve the number of inbound flights.");
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .filter(FlightData::isInbound) // Filter only inbound flights
+                .toList().size();
     }
 
     /**
@@ -55,7 +69,12 @@ public class ServerController {
     @GetMapping("/all-flights-from-country")
     @ResponseStatus(HttpStatus.OK)
     public Integer getFlightsFromCountry(@RequestParam String country) {
-        return 0;
+        log.info("Received request to retrieve the number of flights (inbound & outbound) from country '{}'.", country);
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .filter(flightData -> flightData.country().equals(country))
+                .toList().size();
     }
 
     /**
@@ -66,7 +85,12 @@ public class ServerController {
     @GetMapping("/outbound-flights-from-country")
     @ResponseStatus(HttpStatus.OK)
     public Integer getOutboundFlightsFromCountry(@RequestParam String country) {
-        return 0;
+        log.info("Received request to retrieve the number of outbound flights to country '{}'.", country);
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .filter(flightData -> flightData.country().equals(country) && !flightData.isInbound())
+                .toList().size();
     }
 
     /**
@@ -77,7 +101,12 @@ public class ServerController {
     @GetMapping("/inbound-flights-from-country")
     @ResponseStatus(HttpStatus.OK)
     public Integer getInboundFlightsFromCountry(@RequestParam String country) {
-        return 0;
+        log.info("Received request to retrieve the number of inbound flights to country '{}'.", country);
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .filter(flightData -> flightData.country().equals(country) && flightData.isInbound())
+                .toList().size();
     }
 
     /**
@@ -87,17 +116,34 @@ public class ServerController {
     @GetMapping("/delayed")
     @ResponseStatus(HttpStatus.OK)
     public Integer getDelayed() {
-        return 0;
+        log.info("Received request to retrieve the number of delayed flights.");
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .filter(flightData -> !flightData.realDepartureTime().equals(flightData.estimatedDepartureTime())) // Check if the real departure time is not equal to the estimated departure time
+                .toList().size();
     }
 
     /**
-     * Get the city with the highest number of outbound flights.
+     * Get the city with the highest number of outbound flights from TLV airport.
      * @return City name as String.
      */
     @GetMapping("/most-popular-destination")
     @ResponseStatus(HttpStatus.OK)
-    public Integer getMostPopularDestination() {
-        return 0;
+    public String getMostPopularDestination() {
+        log.info("Received request to retrieve the name of the most popular destination, " +
+                "with the highest number of outbound flights from TLV airport.");
+        return flightScannerService
+                .getFlightsData()
+                .stream()
+                .collect(Collectors.groupingBy(
+                        flightData -> flightData.city() + ", " + flightData.country(), // Add country to the key to make sure there are no two cities from different countries
+                        Collectors.counting()))
+                .entrySet()
+                .stream()
+                .max(Map.Entry.comparingByValue())
+                .map(entry -> entry.getKey().split(",")[0]) // Get only the city of the destination
+                .orElse("There is no most popular destination");
     }
 
     /**
