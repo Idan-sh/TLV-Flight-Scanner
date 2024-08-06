@@ -150,7 +150,7 @@ public class ServerController {
      * Return (if exist) two flights one from Israel and one to Israel,
      * that someone can take for a quick getaway, considering date and time.
      * @return JSON containing departure and arrival flight numbers (Strings) if a getaway exists,
-     * otherwise empty JSON.
+     * otherwise an empty JSON.
      */
     @GetMapping("/quick-getaway")
     @ResponseStatus(HttpStatus.OK)

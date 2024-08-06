@@ -2,6 +2,7 @@ package com.tlvflightscanner.service;
 
 import com.tlvflightscanner.dto.FlightData;
 import com.tlvflightscanner.dto.QuickGetawayResponse;
+import com.tlvflightscanner.validator.DataValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
@@ -38,13 +39,15 @@ public class FlightScannerService {
             JSONObject record = recordsArray.getJSONObject(i);
             FlightData flightData = new FlightData(
                     record.getString("CHOPER") + record.getString("CHFLTN"),
-                    record.getString("CHSTOL"),
-                    record.getString("CHPTOL"),
-                    record.getString("CHLOC1"),
-                    record.getString("CHLOC1T"),
-                    record.getString("CHLOCCT"),
+                    record.optString("CHSTOL"),
+                    record.optString("CHPTOL"),
+                    record.optString("CHLOC1"),
+                    record.optString("CHLOC1T"),
+                    record.optString("CHLOCCT"),
                     record.isNull("CHCINT") // null if inbound, otherwise outbound
             );
+
+            DataValidator.validateFlightData(flightData);
             flightDataList.add(flightData);
         }
 
