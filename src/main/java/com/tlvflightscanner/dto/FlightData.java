@@ -1,4 +1,4 @@
-package com.tlvflightscanner.dto.data;
+package com.tlvflightscanner.dto;
 
 public record FlightData(
         String flightNumber,

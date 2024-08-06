@@ -1,7 +1,7 @@
 package com.tlvflightscanner.controller;
 
-import com.tlvflightscanner.dto.data.FlightData;
-import com.tlvflightscanner.dto.response.QuickGetawayResponse;
+import com.tlvflightscanner.dto.FlightData;
+import com.tlvflightscanner.dto.QuickGetawayResponse;
 import com.tlvflightscanner.service.FlightScannerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -137,12 +137,12 @@ public class ServerController {
                 .getFlightsData()
                 .stream()
                 .collect(Collectors.groupingBy(
-                        flightData -> flightData.city() + ", " + flightData.country(), // Add country to the key to make sure there are no two cities from different countries
+                        FlightData::city,
                         Collectors.counting()))
                 .entrySet()
                 .stream()
                 .max(Map.Entry.comparingByValue())
-                .map(entry -> entry.getKey().split(",")[0]) // Get only the city of the destination
+                .map(Map.Entry::getKey)
                 .orElse("There is no most popular destination");
     }
 
@@ -155,6 +155,7 @@ public class ServerController {
     @GetMapping("/quick-getaway")
     @ResponseStatus(HttpStatus.OK)
     public QuickGetawayResponse getQuickGetaway() {
-        return null;
+        log.info("Received request to retrieve a quick-getaway flights.");
+        return flightScannerService.getQuickGetaway();
     }
 }

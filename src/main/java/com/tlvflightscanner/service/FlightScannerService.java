@@ -1,14 +1,20 @@
 package com.tlvflightscanner.service;
 
-import com.tlvflightscanner.dto.data.FlightData;
+import com.tlvflightscanner.dto.FlightData;
+import com.tlvflightscanner.dto.QuickGetawayResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -37,12 +43,49 @@ public class FlightScannerService {
                     record.getString("CHLOC1"),
                     record.getString("CHLOC1T"),
                     record.getString("CHLOCCT"),
-                    record.get("CHCINT") == null // Empty if inbound, otherwise outbound
+                    record.isNull("CHCINT") // null if inbound, otherwise outbound
             );
             flightDataList.add(flightData);
         }
 
         log.debug("Parsed flight Data List: {}", flightDataList);
         return flightDataList;
+    }
+
+    /**
+     * Returns (if exists) two flights: one from Israel and one to Israel,
+     * that someone can take for a quick getaway - considering date and time.
+     */
+    public QuickGetawayResponse getQuickGetaway() {
+        log.info("Searching for a quick getaway...");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"); // DateTimeFormatter to parse the string times
+        List<FlightData> flights = getFlightsData();
+
+        // Split flights list into inbound flights and outbound flights, sorted by time
+        List<FlightData> inboundFlights = flights.stream()
+                .filter(FlightData::isInbound)
+                .sorted(Comparator.comparing(f -> LocalDateTime.parse(f.realDepartureTime(), dateTimeFormatter)))
+                .toList();
+        List<FlightData> outboundFlights = flights.stream()
+                .filter(flight -> !flight.isInbound())
+                .sorted(Comparator.comparing(f -> LocalDateTime.parse(f.realDepartureTime(), dateTimeFormatter)))
+                .toList();
+
+        // Find outbound flight, then try to find a matching inbound flight
+        for(FlightData outbound : outboundFlights) {
+            Optional<FlightData> matchingInbound = inboundFlights.stream()
+                    .filter(inbound ->
+                            inbound.city().equals(outbound.city()) && // Ensure the cities match
+                                    Duration.between(
+                                            LocalDateTime.parse(outbound.realDepartureTime(), dateTimeFormatter),
+                                                    LocalDateTime.parse(inbound.realDepartureTime(), dateTimeFormatter))
+                                            .toHours() > 0) // Ensure outbound flight is before inbound flight
+                    .findFirst();
+            if (matchingInbound.isPresent()) {
+                return new QuickGetawayResponse(outbound.flightNumber(), matchingInbound.get().flightNumber());
+            }
+        }
+
+        return null; // Couldn't find a quick getaway.
     }
 }
