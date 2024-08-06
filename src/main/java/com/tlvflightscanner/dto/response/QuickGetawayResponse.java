@@ -1,4 +1,4 @@
-package com.tlvflightscanner.dto;
+package com.tlvflightscanner.dto.response;
 
 /**
  * Response to the bonus endpoint request.

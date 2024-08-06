@@ -1,6 +1,9 @@
 package com.tlvflightscanner.controller;
 
-import com.tlvflightscanner.dto.QuickGetawayResponse;
+import com.tlvflightscanner.dto.response.QuickGetawayResponse;
+import com.tlvflightscanner.service.FlightScannerService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -8,7 +11,11 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequiredArgsConstructor
+@Slf4j
 public class ServerController {
+    private final FlightScannerService flightScannerService;
+
     /**
      * Get the number of flights (inbound & outbound) from TLV airport.
      * @return Integer number.
@@ -16,7 +23,8 @@ public class ServerController {
     @GetMapping("/all-flights")
     @ResponseStatus(HttpStatus.OK)
     public Integer getAllFlights() {
-        return 0;
+        log.info("Received request to retrieve all flights");
+        return flightScannerService.getFlightsData().size();
     }
 
     /**
