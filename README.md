@@ -9,7 +9,27 @@ The server uses an external flights API as described in:
 Base URL for data fetching:   
 `https://data.gov.il/api/3/action/datastore_search?resource_id=e83f763b-b7d7-479e-b172- ae981ddc6de5&limit=300`
    
-> All the queries will be limited and the data can change durting time, that means the same query can have different result in long enough time span.   
+> All the queries will be limited and the data can change durting time, that means the same query can have different result in long enough time span.
+
+#### External API results fields
+`_id`: record positive index   
+`CHOPER`: flight Code   
+`CHFLTN`: flight number   
+`CHOPERD`: airline company   
+`CHSTOL`: estimated departure time   
+`CHPTOL`: real departure time   
+`CHAORD`: gate   
+`CHLOC1`: short version destination Airport   
+`CHLOC1D`: full name destination airport   
+`CHLOC1TH`: city Hebrew - name   
+`CHLOC1T`: city English- name   
+`CHLOC1CH`: country Hebrew - name   
+`CHLOCCT`: country English - name   
+`CHTERM`: TLV Terminal   
+`CHCINT`: TLV check-in counter - if empty inbound flights else outbound flight   
+`CHCKZN`: TLV check in zone - if empty inbound flights else outbound flight   
+`CHRMINE`: status in English   
+`CHRMINH`: status in Hebrew   
 
 ## Base URL
 The base URL for all endpoints is: `http://localhost:8080`
